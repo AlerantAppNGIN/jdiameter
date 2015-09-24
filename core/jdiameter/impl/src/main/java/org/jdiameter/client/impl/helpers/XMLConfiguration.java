@@ -73,6 +73,7 @@ import static org.jdiameter.client.impl.helpers.Parameters.OwnIPAddress;
 import static org.jdiameter.client.impl.helpers.Parameters.OwnProductName;
 import static org.jdiameter.client.impl.helpers.Parameters.OwnRealm;
 import static org.jdiameter.client.impl.helpers.Parameters.OwnVendorID;
+import static org.jdiameter.client.impl.helpers.Parameters.OwnSctpStackName;
 import static org.jdiameter.client.impl.helpers.Parameters.PeerIp;
 import static org.jdiameter.client.impl.helpers.Parameters.PeerFSMThreadCount;
 import static org.jdiameter.client.impl.helpers.Parameters.PeerLocalPortRange;
@@ -273,6 +274,9 @@ public class XMLConfiguration extends EmptyConfiguration {
       }
       if (nodeName.equals("Applications")) {
         addApplications(c.item(i));
+      }
+      if (nodeName.equals("SctpStackName")) {
+          add(OwnSctpStackName, getValue(c.item(i)));
       }
     }
   }
@@ -602,25 +606,26 @@ public class XMLConfiguration extends EmptyConfiguration {
     NodeList c = node.getChildNodes();
     for (int i = 0; i < c.getLength(); i++) {
       String nodeName = c.item(i).getNodeName();
-      if (nodeName.equals("MetaData")) {                         addInternalExtension(InternalMetaData,getValue(c.item(i)));                  }
-      else if (nodeName.equals("MessageParser")) {               addInternalExtension(InternalMessageParser,getValue(c.item(i)));             }
-      else if (nodeName.equals("ElementParser")) {               addInternalExtension(InternalElementParser,getValue(c.item(i)));             }
-      else if (nodeName.equals("RouterEngine")) {                addInternalExtension(InternalRouterEngine,getValue(c.item(i)));              }
-      else if (nodeName.equals("PeerController")) {              addInternalExtension(InternalPeerController,getValue(c.item(i)));            }
-      else if (nodeName.equals("RealmController")) {             addInternalExtension(InternalRealmController,getValue(c.item(i)));           }
-      else if (nodeName.equals("SessionFactory")) {              addInternalExtension(InternalSessionFactory,getValue(c.item(i)));            }
-      else if (nodeName.equals("TransportFactory")) {            addInternalExtension(InternalTransportFactory, getValue(c.item(i)));         }
-      else if (nodeName.equals("Connection")) {                  addInternalExtension(InternalConnectionClass, getValue(c.item(i)));          }
-      else if (nodeName.equals("PeerFsmFactory")) {              addInternalExtension(InternalPeerFsmFactory,getValue(c.item(i)));            }
-      else if (nodeName.equals("StatisticFactory")) {            addInternalExtension(InternalStatisticFactory,getValue(c.item(i)));          }
-      else if (nodeName.equals("ConcurrentFactory")) {           addInternalExtension(InternalConcurrentFactory,getValue(c.item(i)));         }
-      else if (nodeName.equals("ConcurrentEntityFactory")) {     addInternalExtension(InternalConcurrentEntityFactory,getValue(c.item(i)));   }
-      else if (nodeName.equals("SessionDatasource")) {           addInternalExtension(InternalSessionDatasource, getValue(c.item(i)));        }
-      else if (nodeName.equals("TimerFacility")) {               addInternalExtension(InternalTimerFacility, getValue(c.item(i)));            }
+      if (nodeName.equals("MetaData")) {                         addInternalExtension(InternalMetaData,getValue(c.item(i)));                     }
+      else if (nodeName.equals("MessageParser")) {               addInternalExtension(InternalMessageParser,getValue(c.item(i)));                }
+      else if (nodeName.equals("ElementParser")) {               addInternalExtension(InternalElementParser,getValue(c.item(i)));                }
+      else if (nodeName.equals("RouterEngine")) {                addInternalExtension(InternalRouterEngine,getValue(c.item(i)));                 }
+      else if (nodeName.equals("PeerController")) {              addInternalExtension(InternalPeerController,getValue(c.item(i)));               }
+      else if (nodeName.equals("RealmController")) {             addInternalExtension(InternalRealmController,getValue(c.item(i)));              }
+      else if (nodeName.equals("SessionFactory")) {              addInternalExtension(InternalSessionFactory,getValue(c.item(i)));               }
+      else if (nodeName.equals("TransportFactory")) {            addInternalExtension(InternalTransportFactory, getValue(c.item(i)));            }
+      else if (nodeName.equals("Connection")) {                  addInternalExtension(InternalConnectionClass, getValue(c.item(i)));             }
+      else if (nodeName.equals("PeerFsmFactory")) {              addInternalExtension(InternalPeerFsmFactory,getValue(c.item(i)));               }
+      else if (nodeName.equals("StatisticFactory")) {            addInternalExtension(InternalStatisticFactory,getValue(c.item(i)));             }
+      else if (nodeName.equals("ConcurrentFactory")) {           addInternalExtension(InternalConcurrentFactory,getValue(c.item(i)));            }
+      else if (nodeName.equals("ConcurrentEntityFactory")) {     addInternalExtension(InternalConcurrentEntityFactory,getValue(c.item(i)));      }
+      else if (nodeName.equals("SessionDatasource")) {           addInternalExtension(InternalSessionDatasource, getValue(c.item(i)));           }
+      else if (nodeName.equals("TimerFacility")) {               addInternalExtension(InternalTimerFacility, getValue(c.item(i)));               }
       //FIXME: possibly should not be in client...
-      else if (nodeName.equals("AgentRedirect")) {               addInternalExtension(InternalAgentRedirect, getValue(c.item(i)));            }
-      else if (nodeName.equals("AgentConfiguration")) {          add(InternalAgentConfiguration,getValue(c.item(i)))   ;     }
-      else if (nodeName.equals("StatisticProcessor")) {          addInternalExtension(InternalStatisticProcessor,getValue(c.item(i)))   ;     }
+      else if (nodeName.equals("AgentRedirect")) {               addInternalExtension(InternalAgentRedirect, getValue(c.item(i)));               }
+      else if (nodeName.equals("AgentConfiguration")) {          add(InternalAgentConfiguration,getValue(c.item(i)))   ;                         }
+      else if (nodeName.equals("StatisticProcessor")) {          addInternalExtension(InternalStatisticProcessor,getValue(c.item(i)))   ;        }
+      else if (nodeName.equals("ManagementType")) {              addInternalExtension(InternalSctpManagementConfiguration,getValue(c.item(i)));  }
       else {
         appendOtherExtension(c.item(i));
       }

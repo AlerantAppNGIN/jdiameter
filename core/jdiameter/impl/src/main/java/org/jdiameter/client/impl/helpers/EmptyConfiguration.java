@@ -80,8 +80,8 @@ public class EmptyConfiguration implements AppConfiguration {
           add(InternalAgentConfiguration, InternalAgentConfiguration.defValue()).
           add(InternalSessionDatasource, InternalSessionDatasource.defValue()).
           add(InternalTimerFacility, InternalTimerFacility.defValue()).
-          add(InternalStatisticFactory, InternalStatisticFactory.defValue()
-
+          add(InternalStatisticFactory, InternalStatisticFactory.defValue()).
+          add(InternalSctpManagementConfiguration, InternalSctpManagementConfiguration.defValue()
               ),
               getInstance().  // StackLayer extension point
               add(ExtensionName, ExtensionPoint.StackLayer.name()),

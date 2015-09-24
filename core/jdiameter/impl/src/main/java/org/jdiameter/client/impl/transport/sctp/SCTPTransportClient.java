@@ -19,16 +19,26 @@
 
 package org.jdiameter.client.impl.transport.sctp;
 
+import static org.jdiameter.client.impl.helpers.Parameters.OwnIPAddress;
+import static org.jdiameter.server.impl.helpers.Parameters.OwnIPAddresses;
+
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.jdiameter.api.AvpDataException;
+import org.jdiameter.api.Configuration;
 import org.jdiameter.client.api.io.NotInitializedException;
+import org.jdiameter.client.impl.helpers.AppConfiguration;
+import org.jdiameter.client.impl.helpers.ExtensionPoint;
+import org.jdiameter.client.impl.helpers.Parameters;
 import org.mobicents.protocols.api.Association;
 import org.mobicents.protocols.api.AssociationListener;
 import org.mobicents.protocols.api.IpChannelType;
+import org.mobicents.protocols.api.Management;
 import org.mobicents.protocols.api.PayloadData;
-import org.mobicents.protocols.sctp.AssociationImpl;
 import org.mobicents.protocols.sctp.ManagementImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -43,14 +53,17 @@ public class SCTPTransportClient {
   private static final int CONNECT_DELAY = 5000;  
   private static final int DELAY = 50;  
 
-  private ManagementImpl management = null;
-  private AssociationImpl clientAssociation = null;
+  private Management management = null;
+  private Association clientAssociation = null;
   private SCTPClientConnection parentConnection;
   private String clientAssociationName;
+  private String usedManagementImplementation;
   protected InetSocketAddress destAddress;
   protected InetSocketAddress origAddress;
   private int payloadProtocolId = 0;
   private int streamNumber = 0;
+  
+  private Configuration config;
 
   private static final Logger logger = LoggerFactory.getLogger(SCTPTransportClient.class);
 
@@ -78,15 +91,35 @@ public class SCTPTransportClient {
 
     logger.debug("Initializing SCTP client");
 
-    clientAssociationName = origAddress.getHostName() + "." + origAddress.getPort();
+    if (config != null) {
+    	String sctpStackName = config.getStringValue(Parameters.OwnSctpStackName.ordinal(),null);
+    	if (sctpStackName != null && sctpStackName.length()>0) {
+    		clientAssociationName = sctpStackName;
+    	}
+    	else{
+    		clientAssociationName = origAddress.getHostName() + "." + origAddress.getPort() + "_" + destAddress.getHostName() + "." + destAddress.getPort();
+    	}
+    	
+        Configuration[] children = config.getChildren(Parameters.Extensions.ordinal());
+        
+        AppConfiguration internalExtensions = (AppConfiguration) children[ExtensionPoint.Internal.id()];
+        usedManagementImplementation = internalExtensions.getStringValue(
+                ExtensionPoint.InternalSctpManagementConfiguration.ordinal(), (String) ExtensionPoint.InternalSctpManagementConfiguration.defValue()
+        );
+    }
+    else {
+    	clientAssociationName = origAddress.getHostName() + "." + origAddress.getPort() + "_" + destAddress.getHostName() + "." + destAddress.getPort();
+    	usedManagementImplementation = ExtensionPoint.InternalSctpManagementConfiguration.defValue();
+    }
 
     try {
 
       if (this.management == null) {
-        this.management = new ManagementImpl(clientAssociationName);
-        this.management.setConnectDelay(1);// Try connecting every 10 secs
+        this.management = SctpClientManagementFactory.createOrGetManagement(clientAssociationName, usedManagementImplementation);
         this.management.setSingleThread(true);
         this.management.start();
+        //TODO:......
+        this.management.setConnectDelay(10000);// Try connecting every 10 secs
         logger.debug("Management initialized.");
       }
       else {
@@ -96,9 +129,28 @@ public class SCTPTransportClient {
       if (this.clientAssociation == null) {
         logger.debug("Creating CLIENT ASSOCIATION '{}'. Origin Address [{}] <=> Dest Address [{}]", new Object[] {
             clientAssociationName, origAddress, destAddress });
+        
+        Configuration[] ipAddresses = config.getChildren(OwnIPAddresses.ordinal());
+        List<String> extraHostAddressesList = new ArrayList<String>();
+        if (ipAddresses != null) {
+          for (Configuration address : ipAddresses) {
+            if (address != null) {
+              String tmp = address.getStringValue(OwnIPAddress.ordinal(), null);
+              if (tmp != null && tmp.length()>0) {
+            	if (!origAddress.getAddress().getHostAddress().equals(tmp)){
+            		logger.debug("Extra host address for SCTP multi-homing: "+tmp);
+            		extraHostAddressesList.add(tmp);
+                }
+              }
+            }
+          }
+        }
+        String[] extraHostAddresses = extraHostAddressesList.toArray(new String[extraHostAddressesList.size()]);
+
+        
         this.clientAssociation = this.management.addAssociation(origAddress.getAddress().getHostAddress(),
             origAddress.getPort(), destAddress.getAddress().getHostAddress(), destAddress.getPort(), clientAssociationName,
-            IpChannelType.SCTP, null);
+            IpChannelType.SCTP, extraHostAddresses);
       }
       else {
         logger.debug("CLIENT ASSOCIATION '{}'. Origin Address [{}:{}] <=> Dest Address [{}:{}] already present. Re-using it.",
@@ -182,6 +234,11 @@ public class SCTPTransportClient {
       logger.debug("onCommunicationShutdown called for [{}]", this);
       try {
         getParent().onDisconnect();
+        if (management.getAssociation(clientAssociationName).isStarted()){
+          stop();
+        }
+        management.removeAssociation(clientAssociationName);
+        clientAssociation = null;
       }
       catch (Exception e) {
         logger.debug("Error", e);
@@ -270,6 +327,10 @@ public class SCTPTransportClient {
     if (logger.isDebugEnabled()) {
       logger.debug("Origin address is set to [{}:{}]", origAddress.getHostName(), origAddress.getPort());
     }
+  }
+
+  public void setConfig(Configuration config){
+    this.config=config;
   }
 
   public InetSocketAddress getOrigAddress() {

@@ -101,6 +101,7 @@ import org.jdiameter.client.api.io.IConnectionListener;
 import org.jdiameter.client.api.io.TransportException;
 import org.jdiameter.client.api.parser.IMessageParser;
 import org.jdiameter.client.impl.controller.PeerTableImpl;
+import org.jdiameter.client.impl.helpers.Parameters;
 import org.jdiameter.common.api.concurrent.IConcurrentFactory;
 import org.jdiameter.common.api.statistic.IStatisticManager;
 import org.jdiameter.server.api.IFsmFactory;
@@ -348,8 +349,23 @@ public class MutablePeerTableImpl extends PeerTableImpl implements IMutablePeerT
     connHandler = connScheduler.scheduleAtFixedRate(connectionCheckTask, CONN_INVALIDATE_PERIOD, CONN_INVALIDATE_PERIOD, TimeUnit.MILLISECONDS);
     // Start server socket
     try {
-      logger.debug("Creating network guard");
-      networkGuard = createNetworkGuard(transportFactory);
+    	//PATCH: if every peer is a server (so we are acting as a client), then no sctp server socket is created
+    	boolean createSCTPServerSocket = false;
+    	Configuration[] peers = this.config.getChildren(Parameters.PeerTable.ordinal());
+        if (peers != null && peers.length > 0) {
+          for (Configuration peerConfig : peers) {
+            if (!peerConfig.isAttributeExist(PeerAttemptConnection.ordinal()) || !peerConfig.getBooleanValue(PeerAttemptConnection.ordinal(), false)){
+            	createSCTPServerSocket=true;
+            }
+          }
+        }
+        
+    	if (createSCTPServerSocket){
+    		logger.debug("Creating network guard");
+    		networkGuard = createNetworkGuard(transportFactory);
+    	} else {
+    		logger.debug("Not creating network guard, every peer acts as a server, no need for sctp server socket");
+    	}
     }
     catch (TransportException e) {
       // We want the root cause, that's what matters to us...

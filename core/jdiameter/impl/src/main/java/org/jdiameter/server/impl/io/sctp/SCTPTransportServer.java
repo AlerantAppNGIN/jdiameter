@@ -135,6 +135,7 @@ public class SCTPTransportServer {
             + origAddress.getPort());
         this.management.setSingleThread(true);
         this.management.start();
+        this.management.setConnectDelay(1000);
       }
 
       logger.debug("Orig Address: '{}:{}'", origAddress.getAddress().getHostAddress(), origAddress.getPort());

@@ -84,6 +84,14 @@
                 </xsi:complexType>
             </xsi:element>
             <xsi:element ref="Applications" minOccurs="0" maxOccurs="1" />
+            <xsi:element name="SctpStackName" minOccurs="0" maxOccurs="1">
+                <xsi:annotation>
+                    <xsi:documentation>Name of sctp stack.</xsi:documentation>
+                </xsi:annotation>
+                <xsi:complexType>
+                    <xsi:attribute name="value" type="xsi:string" use="required" />
+                </xsi:complexType>
+            </xsi:element>
         </xsi:sequence>
         <xsi:attribute name="security_ref" type="xsi:string" />
     </xsi:complexType>

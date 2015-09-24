@@ -28,6 +28,7 @@ import org.jdiameter.client.impl.helpers.ExtensionPoint;
 
 import static org.jdiameter.client.impl.helpers.ExtensionPoint.InternalAgentConfiguration;
 import static org.jdiameter.client.impl.helpers.ExtensionPoint.InternalConnectionClass;
+import static org.jdiameter.client.impl.helpers.ExtensionPoint.InternalSctpManagementConfiguration;
 import static org.jdiameter.client.impl.helpers.ExtensionPoint.InternalTransportFactory;
 import static org.jdiameter.client.impl.helpers.Parameters.ExtensionName;
 import static org.jdiameter.server.impl.helpers.ExtensionPoint.*;
@@ -79,7 +80,8 @@ public class EmptyConfiguration extends org.jdiameter.client.impl.helpers.EmptyC
           add(InternalAgentProxy, InternalAgentProxy.defValue()).
           add(InternalSessionDatasource, InternalSessionDatasource.defValue()).
           add(InternalTimerFacility, InternalTimerFacility.defValue()).
-          add(InternalPeerController, "org.jdiameter.server.impl.MutablePeerTableImpl"),
+          add(InternalPeerController, "org.jdiameter.server.impl.MutablePeerTableImpl").
+          add(InternalSctpManagementConfiguration, InternalSctpManagementConfiguration.defValue()),
           getInstance().  // StackLayer extension point
           add(ExtensionName, ExtensionPoint.StackLayer.name()),
           getInstance().  // ControllerLayer extension point

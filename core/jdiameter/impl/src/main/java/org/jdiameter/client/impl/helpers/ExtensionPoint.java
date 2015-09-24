@@ -126,6 +126,11 @@ public class ExtensionPoint extends Ordinal {
   public static final ExtensionPoint InternalAgentConfiguration = new ExtensionPoint("InternalAgentConfiguration", "org.jdiameter.server.impl.agent.AgentConfigurationImpl");
 
   /**
+   * Sctp client management implementation class name
+   */
+  public static final ExtensionPoint InternalSctpManagementConfiguration = new ExtensionPoint("InternalSctpManagementConfiguration", "org.mobicents.protocols.sctp.ManagementImpl");
+  
+  /**
    * Session Datasource class name
    */
   public static final ExtensionPoint InternalSessionDatasource = new ExtensionPoint("InternalSessionDatasource", "org.jdiameter.common.impl.data.LocalDataSource");
@@ -155,6 +160,7 @@ public class ExtensionPoint extends Ordinal {
       InternalConcurrentFactory,
       InternalConcurrentEntityFactory,
       InternalTimerFacility,
+      InternalSctpManagementConfiguration,
       InternalSessionDatasource,
       InternalAgentRedirect,
       InternalAgentProxy,

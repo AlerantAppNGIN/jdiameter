@@ -70,6 +70,11 @@ public class Parameters extends Ordinal {
   public static final Parameters OwnFirmwareRevision = new Parameters("OwnFirmwareRevision", Long.class, 0L);
 
   /**
+   * Local peer sctp stack name
+   */
+  public static final Parameters OwnSctpStackName = new Parameters("OwnSctpStackName", String.class, "");
+  
+  /**
    * Task executor task queue size  property 
    */
   public static final Parameters QueueSize = new Parameters("QueueSize", Integer.class,   10000);

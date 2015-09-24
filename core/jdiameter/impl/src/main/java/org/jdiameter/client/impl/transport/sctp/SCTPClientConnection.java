@@ -76,6 +76,7 @@ public class SCTPClientConnection implements IConnection {
         localAddress, localPort });
     client.setDestAddress(new InetSocketAddress(remoteAddress, remotePort));
     client.setOrigAddress(new InetSocketAddress(localAddress, localPort));
+    client.setConfig(config);
   }
 
   public SCTPClientConnection(Configuration config, IConcurrentFactory concurrentFactory, InetAddress remoteAddress,
@@ -86,6 +87,7 @@ public class SCTPClientConnection implements IConnection {
         localAddress, localPort });
     client.setDestAddress(new InetSocketAddress(remoteAddress, remotePort));
     client.setOrigAddress(new InetSocketAddress(localAddress, localPort));
+    client.setConfig(config);
     listeners.add(listener);
   }
 
