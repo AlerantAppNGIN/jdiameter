@@ -10,7 +10,7 @@ import org.mobicents.protocols.api.Management;
 
 public class SctpClientManagementFactory {
 
-	private static ConcurrentHashMap<String, Management> managementImplStore = new ConcurrentHashMap<>();;
+	private static ConcurrentHashMap<String, Management> managementImplStore = new ConcurrentHashMap<String, Management>();;
 
 	static synchronized Management createOrGetManagement(String stackName,
 			String usedManagementImplementation) throws IOException {
@@ -18,8 +18,8 @@ public class SctpClientManagementFactory {
 		Management managmentImplInstance = managementImplStore.get(stackName);
 		if (managmentImplInstance == null) {
 			try {
-				Class<?> managementClassName = forName(usedManagementImplementation);
-				Constructor<?> managementConstructor = managementClassName
+				Class managementClassName = forName(usedManagementImplementation);
+				Constructor managementConstructor = managementClassName
 						.getConstructor(String.class);
 				managmentImplInstance = (Management) managementConstructor
 						.newInstance(stackName);

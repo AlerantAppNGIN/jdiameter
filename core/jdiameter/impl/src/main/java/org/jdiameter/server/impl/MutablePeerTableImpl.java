@@ -539,7 +539,7 @@ public class MutablePeerTableImpl extends PeerTableImpl implements IMutablePeerT
 
                 public void internalError(String connKey, IMessage message, TransportException cause) {
                   logger.debug("Connection [{}] internalError [{}]", connKey, cause);
-                  unregister(true);
+                  //unregister(true);
                 }
 
                 public void unregister(boolean release) {
