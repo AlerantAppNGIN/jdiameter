@@ -91,14 +91,10 @@ public class SCTPTransportClient {
 
     logger.debug("Initializing SCTP client");
 
+    String sctpStackName = null;
     if (config != null) {
-    	String sctpStackName = config.getStringValue(Parameters.OwnSctpStackName.ordinal(),null);
-    	if (sctpStackName != null && sctpStackName.length()>0) {
-    		clientAssociationName = sctpStackName;
-    	}
-    	else{
-    		clientAssociationName = origAddress.getHostName() + "." + origAddress.getPort() + "_" + destAddress.getHostName() + "." + destAddress.getPort();
-    	}
+    	sctpStackName = config.getStringValue(Parameters.OwnSctpStackName.ordinal(), null);
+    	clientAssociationName = origAddress.getHostName() + "." + origAddress.getPort() + "_" + destAddress.getHostName() + "." + destAddress.getPort();
     	
         Configuration[] children = config.getChildren(Parameters.Extensions.ordinal());
         
@@ -115,11 +111,18 @@ public class SCTPTransportClient {
     try {
 
       if (this.management == null) {
-        this.management = SctpClientManagementFactory.createOrGetManagement(clientAssociationName, usedManagementImplementation);
-        this.management.setSingleThread(true);
-        this.management.start();
-        //TODO:......
-        this.management.setConnectDelay(10000);// Try connecting every 10 secs
+    	if (sctpStackName != null && sctpStackName.length()>0) {
+    		this.management = SctpClientManagementFactory.createOrGetManagement(sctpStackName, usedManagementImplementation);
+    	}
+    	else {
+    		this.management = SctpClientManagementFactory.createOrGetManagement(clientAssociationName, usedManagementImplementation);
+    	}
+    	if (!this.management.isStarted()){
+	        this.management.setSingleThread(true);
+	        this.management.start();
+	        //TODO:......
+	        this.management.setConnectDelay(10000);// Try connecting every 10 secs
+    	}
         logger.debug("Management initialized.");
       }
       else {
