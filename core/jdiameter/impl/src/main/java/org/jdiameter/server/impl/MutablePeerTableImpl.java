@@ -125,6 +125,7 @@ import org.slf4j.LoggerFactory;
 public class MutablePeerTableImpl extends PeerTableImpl implements IMutablePeerTable, ConfigurationListener {
 
   private static final Logger logger = LoggerFactory.getLogger(MutablePeerTableImpl.class);
+  public static final String SPEER_DISCONNECT_ON_INTERNAL_ERROR_KEY = "jdiameter.sPeerDisconnectOnInternalError";
 
   private static final int CONN_INVALIDATE_PERIOD = 60000;
   private static final int MAX_PEER_TABLE_SIZE = 10000;
@@ -155,6 +156,7 @@ public class MutablePeerTableImpl extends PeerTableImpl implements IMutablePeerT
   protected INetworkGuard networkGuard;
   protected INetwork network;
   protected Set<String> predefinedPeerTable;
+  protected boolean speerDisconnectOnInternalError;
 
   // Overload handling --------------------------------------------------------
   protected IOverloadManager ovrManager;
@@ -190,6 +192,10 @@ public class MutablePeerTableImpl extends PeerTableImpl implements IMutablePeerT
       return duplicationKey;
     }
   }
+  
+  protected boolean isServerPeerDisconnectOnInternalError() {
+    return Boolean.valueOf(System.getProperty(SPEER_DISCONNECT_ON_INTERNAL_ERROR_KEY, "true"));
+  }
 
   public MutablePeerTableImpl(Configuration config, MetaData metaData,IContainer stack, org.jdiameter.server.api.IRouter router,
       ISessionFactory sessionFactory, IFsmFactory fsmFactory, ITransportLayerFactory trFactory,
@@ -208,6 +214,7 @@ public class MutablePeerTableImpl extends PeerTableImpl implements IMutablePeerT
     this.network = network;
     this.ovrManager = ovrManager;
     this.network.setPeerManager(this);
+    this.speerDisconnectOnInternalError = isServerPeerDisconnectOnInternalError();
     this.stack = stack;
     this.isAcceptUndefinedPeer = config.getBooleanValue(AcceptUndefinedPeer.ordinal(), false);
     this.duplicateProtection = config.getBooleanValue(DuplicateProtection.ordinal(), (Boolean) DuplicateProtection.defValue());
@@ -539,7 +546,9 @@ public class MutablePeerTableImpl extends PeerTableImpl implements IMutablePeerT
 
                 public void internalError(String connKey, IMessage message, TransportException cause) {
                   logger.debug("Connection [{}] internalError [{}]", connKey, cause);
-                  //unregister(true);
+                  if (speerDisconnectOnInternalError) {
+                    unregister(true);
+                  }
                 }
 
                 public void unregister(boolean release) {
