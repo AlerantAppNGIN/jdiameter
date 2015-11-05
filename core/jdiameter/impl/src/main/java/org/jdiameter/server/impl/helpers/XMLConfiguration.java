@@ -488,7 +488,10 @@ public class XMLConfiguration extends EmptyConfiguration {
     }
     if (node.getAttributes().getNamedItem("security_ref") != null) {
         c.add(SecurityRef, node.getAttributes().getNamedItem("security_ref").getNodeValue());
-      }
+    }
+    if (node.getAttributes().getNamedItem("association_name") != null) {
+        c.add(PeerAssociationName, node.getAttributes().getNamedItem("association_name").getNodeValue());
+    }
     return c;
   }
 

@@ -91,13 +91,13 @@ public class PeerImpl extends org.jdiameter.client.impl.controller.PeerImpl impl
   /**
    *  Create instance of class
    */
-  public PeerImpl(int rating, URI remotePeer, String ip, String portRange, boolean attCnn, IConnection connection,
+  public PeerImpl(int rating, URI remotePeer, String ip, String portRange, String associationName, boolean attCnn, IConnection connection,
       MutablePeerTableImpl peerTable, IMetaData metaData, Configuration config, Configuration peerConfig,
       ISessionFactory sessionFactory, IFsmFactory fsmFactory, ITransportLayerFactory trFactory,
       IStatisticManager statisticFactory, IConcurrentFactory concurrentFactory,
       IMessageParser parser, INetwork nWork, IOverloadManager oManager, final ISessionDatasource sessionDataSource)
   throws InternalException, TransportException {
-    super(peerTable, rating, remotePeer, ip, portRange, metaData, config, peerConfig, fsmFactory, trFactory, parser,
+    super(peerTable, rating, remotePeer, ip, portRange, associationName, metaData, config, peerConfig, fsmFactory, trFactory, parser,
         statisticFactory, concurrentFactory, connection, sessionDataSource);
     // Create specific action context
     this.peerTable = peerTable;

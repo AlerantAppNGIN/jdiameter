@@ -139,6 +139,10 @@ public class Parameters extends Ordinal {
    */
   public static final Parameters PeerRating = new Parameters("PeerRating", Integer.class, 0);
   /**
+   * Peer association name property
+   */
+  public static final Parameters PeerAssociationName = new Parameters("PeerAssociationName", String.class, "");
+  /**
    *  Peer ptoperty
    */
   public static final Parameters Peer = new Parameters("Peer", Object.class);

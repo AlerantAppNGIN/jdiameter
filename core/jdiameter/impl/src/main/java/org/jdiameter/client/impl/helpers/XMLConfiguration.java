@@ -74,6 +74,7 @@ import static org.jdiameter.client.impl.helpers.Parameters.OwnProductName;
 import static org.jdiameter.client.impl.helpers.Parameters.OwnRealm;
 import static org.jdiameter.client.impl.helpers.Parameters.OwnVendorID;
 import static org.jdiameter.client.impl.helpers.Parameters.OwnSctpStackName;
+import static org.jdiameter.client.impl.helpers.Parameters.PeerAssociationName;
 import static org.jdiameter.client.impl.helpers.Parameters.PeerIp;
 import static org.jdiameter.client.impl.helpers.Parameters.PeerFSMThreadCount;
 import static org.jdiameter.client.impl.helpers.Parameters.PeerLocalPortRange;
@@ -527,7 +528,9 @@ public class XMLConfiguration extends EmptyConfiguration {
     if (node.getAttributes().getNamedItem("security_ref") != null) {
       peerConfig.add(SecurityRef, node.getAttributes().getNamedItem("security_ref").getNodeValue());
     }
-
+    if (node.getAttributes().getNamedItem("association_name") != null) {
+      peerConfig.add(PeerAssociationName, node.getAttributes().getNamedItem("association_name").getNodeValue());
+    }
     return peerConfig;
   }
 

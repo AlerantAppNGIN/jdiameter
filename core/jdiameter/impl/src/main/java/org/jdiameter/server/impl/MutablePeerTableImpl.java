@@ -236,7 +236,7 @@ public class MutablePeerTableImpl extends PeerTableImpl implements IMutablePeerT
   }
 
   @Override
-  protected Peer createPeer(int rating, String uri, String ip, String portRange, MetaData metaData, Configuration globalConfig,
+  protected Peer createPeer(int rating, String uri, String ip, String portRange, String associationName, MetaData metaData, Configuration globalConfig,
       Configuration peerConfig, org.jdiameter.client.api.fsm.IFsmFactory fsmFactory,
       org.jdiameter.client.api.io.ITransportLayerFactory transportFactory,
       IStatisticManager statisticFactory, IConcurrentFactory concurrentFactory,
@@ -250,7 +250,7 @@ public class MutablePeerTableImpl extends PeerTableImpl implements IMutablePeerT
     predefinedPeerTable.add(new URI(uri).getFQDN());
     if (peerConfig.getBooleanValue(PeerAttemptConnection.ordinal(), false)) {
       logger.debug("Peer at URI [{}] is configured to attempt a connection (i.e. acting as a client) and a new peer instance will be created and returned", uri);
-      return newPeerInstance(rating, new URI(uri), ip, portRange, true, null,
+      return newPeerInstance(rating, new URI(uri), ip, portRange, associationName, true, null,
           metaData, globalConfig, peerConfig, (IFsmFactory) fsmFactory,
           (ITransportLayerFactory) transportFactory, parser, statisticFactory, concurrentFactory);
     }
@@ -260,13 +260,13 @@ public class MutablePeerTableImpl extends PeerTableImpl implements IMutablePeerT
     }
   }
 
-  protected IPeer newPeerInstance(int rating, URI uri, String ip, String portRange, boolean attCnn, IConnection connection,
+  protected IPeer newPeerInstance(int rating, URI uri, String ip, String portRange, String associationName, boolean attCnn, IConnection connection,
       MetaData metaData, Configuration globalConfig, Configuration peerConfig, IFsmFactory fsmFactory,
       ITransportLayerFactory transportFactory, IMessageParser parser,
       IStatisticManager statisticFactory, IConcurrentFactory concurrentFactory) throws URISyntaxException, UnknownServiceException, InternalException, TransportException {
     logger.debug("Creating and returning a new Peer Instance for URI [{}].", uri);
     return new org.jdiameter.server.impl.PeerImpl(
-        rating, uri, ip, portRange, attCnn, connection,
+        rating, uri, ip, portRange, associationName, attCnn, connection,
         this, (org.jdiameter.server.api.IMetaData) metaData, globalConfig, peerConfig, sessionFactory,
         fsmFactory, transportFactory, statisticFactory, concurrentFactory, parser, network, ovrManager, sessionDatasource
     );
@@ -519,7 +519,7 @@ public class MutablePeerTableImpl extends PeerTableImpl implements IMutablePeerT
                             uri = new URI("aaa://" + host + ":" + port);
                           }
 
-                          peer = newPeerInstance(0, uri, connection.getRemoteAddress().getHostAddress(), null, false, connection,
+                          peer = newPeerInstance(0, uri, connection.getRemoteAddress().getHostAddress(), null, null, false, connection,
                               metaData, config, null, fsmFactory, transportFactory, parser, statisticFactory, concurrentFactory);
                           logger.debug("Created new peer instance [{}] and adding to peer table", peer);
                           peer.setRealm(realm);
@@ -660,7 +660,7 @@ public class MutablePeerTableImpl extends PeerTableImpl implements IMutablePeerT
       if (peerConfig == null) {
         peerConfig = new EmptyConfiguration(false).add(PeerAttemptConnection, connecting);
       }
-      IPeer peer = (IPeer) createPeer(0, peerURI.toString(), null, null, metaData, config, peerConfig, fsmFactory, 
+      IPeer peer = (IPeer) createPeer(0, peerURI.toString(), null, null, null, metaData, config, peerConfig, fsmFactory, 
           transportFactory, statisticFactory, concurrentFactory, parser);
       if (peer == null) {
         return null;

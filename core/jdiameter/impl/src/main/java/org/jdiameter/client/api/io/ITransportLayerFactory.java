@@ -49,7 +49,7 @@ public interface ITransportLayerFactory extends Wrapper {
    * @return IConnection instance
    * @throws TransportException
    */
-  IConnection createConnection(InetAddress remoteAddress, IConcurrentFactory factory, int remotePort, InetAddress localAddress, int localPort, String ref) throws TransportException;
+  IConnection createConnection(InetAddress remoteAddress, IConcurrentFactory factory, int remotePort, InetAddress localAddress, int localPort, String associationName, String ref) throws TransportException;
 
   /**
    * Create new IConnection instance with predefined parameters
@@ -64,5 +64,5 @@ public interface ITransportLayerFactory extends Wrapper {
    * @return IConnection instance
    * @throws TransportException
    */
-  IConnection createConnection(InetAddress remoteAddress, IConcurrentFactory factory, int remotePort, InetAddress localAddress, int localPort, IConnectionListener listener, String ref) throws TransportException;
+  IConnection createConnection(InetAddress remoteAddress, IConcurrentFactory factory, int remotePort, InetAddress localAddress, int localPort, String associationName, IConnectionListener listener, String ref) throws TransportException;
 }

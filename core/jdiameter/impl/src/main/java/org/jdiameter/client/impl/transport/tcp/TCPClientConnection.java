@@ -83,14 +83,14 @@ public class TCPClientConnection implements IConnection {
   }
 
   public TCPClientConnection(Configuration config, IConcurrentFactory concurrentFactory, InetAddress remoteAddress,
-      int remotePort, InetAddress localAddress, int localPort, IMessageParser parser, String ref) {
+      int remotePort, InetAddress localAddress, int localPort, String associationName, IMessageParser parser, String ref) {
     this(concurrentFactory, parser);
     client.setDestAddress(new InetSocketAddress(remoteAddress, remotePort));
     client.setOrigAddress(new InetSocketAddress(localAddress, localPort));
   }
 
   public TCPClientConnection(Configuration config, IConcurrentFactory concurrentFactory, InetAddress remoteAddress,
-      int remotePort, InetAddress localAddress, int localPort, IConnectionListener listener,
+      int remotePort, InetAddress localAddress, int localPort, String associationName, IConnectionListener listener,
       IMessageParser parser, String ref) {
     this(concurrentFactory, parser);
     client.setDestAddress(new InetSocketAddress(remoteAddress, remotePort));

@@ -50,6 +50,7 @@ import org.slf4j.LoggerFactory;
  */
 public class SCTPTransportClient {
 
+  private static final int SCTP_CONNECT_DELAY = 1000;
   private static final int CONNECT_DELAY = 5000;  
   private static final int DELAY = 50;  
 
@@ -94,7 +95,6 @@ public class SCTPTransportClient {
     String sctpStackName = null;
     if (config != null) {
     	sctpStackName = config.getStringValue(Parameters.OwnSctpStackName.ordinal(), null);
-    	clientAssociationName = origAddress.getHostName() + "." + origAddress.getPort() + "_" + destAddress.getHostName() + "." + destAddress.getPort();
     	
         Configuration[] children = config.getChildren(Parameters.Extensions.ordinal());
         
@@ -104,9 +104,12 @@ public class SCTPTransportClient {
         );
     }
     else {
-    	clientAssociationName = origAddress.getHostName() + "." + origAddress.getPort() + "_" + destAddress.getHostName() + "." + destAddress.getPort();
     	usedManagementImplementation = ExtensionPoint.InternalSctpManagementConfiguration.defValue();
     }
+    
+    if (!(clientAssociationName != null && clientAssociationName.length() > 0)) {
+		clientAssociationName = origAddress.getHostName() + "." + origAddress.getPort() + "_" + destAddress.getHostName() + "." + destAddress.getPort();
+	}
 
     try {
 
@@ -120,8 +123,7 @@ public class SCTPTransportClient {
     	if (!this.management.isStarted()){
 	        this.management.setSingleThread(true);
 	        this.management.start();
-	        //TODO:......
-	        this.management.setConnectDelay(10000);// Try connecting every 10 secs
+	        this.management.setConnectDelay(SCTP_CONNECT_DELAY);
     	}
         logger.debug("Management initialized.");
       }
@@ -173,23 +175,28 @@ public class SCTPTransportClient {
 
   public void start() throws NotInitializedException, IOException {
     // for client
-    logger.debug("Starting SCTP client");
-    try {
-      this.clientAssociation.setAssociationListener(new ClientAssociationListener());
-      this.management.startAssociation(clientAssociationName);
-    }
-    catch (Exception e) {
-      logger.error("Failed to start client ", e);
-    }
-
-    if (getParent() == null) {
-      throw new NotInitializedException("No parent connection is set");
-    }
-    
-    logger.debug("Successfuly initialized SCTP Client Host [{}:{}] Peer [{}:{}]", new Object[] { clientAssociation.getHostAddress(),
-        clientAssociation.getHostPort(), clientAssociation.getPeerAddress(), clientAssociation.getPeerPort() });
-    logger.debug("Client Association Status: Started[{}] Connected[{}] Up[{}] ", new Object[]{clientAssociation.isStarted(), clientAssociation.isConnected(), clientAssociation.isUp()});
-    logger.trace("Client Association [{}]", clientAssociation);
+	if (!this.clientAssociation.isStarted()) {
+	    logger.debug("Starting SCTP client");
+	    try {
+	      this.clientAssociation.setAssociationListener(new ClientAssociationListener());
+	      this.management.startAssociation(clientAssociationName);
+	    }
+	    catch (Exception e) {
+	      logger.error("Failed to start client ", e);
+	    }
+	
+	    if (getParent() == null) {
+	      throw new NotInitializedException("No parent connection is set");
+	    }
+	    
+	    logger.debug("Successfuly initialized SCTP Client Host [{}:{}] Peer [{}:{}]", new Object[] { clientAssociation.getHostAddress(),
+	        clientAssociation.getHostPort(), clientAssociation.getPeerAddress(), clientAssociation.getPeerPort() });
+	    logger.debug("Client Association Status: Started[{}] Connected[{}] Up[{}] ", new Object[]{clientAssociation.isStarted(), clientAssociation.isConnected(), clientAssociation.isUp()});
+	    logger.trace("Client Association [{}]", clientAssociation);
+	} else {
+		logger.debug("Client Association is already started. Status: Started[{}] Connected[{}] Up[{}] ", new Object[]{clientAssociation.isStarted(), clientAssociation.isConnected(), clientAssociation.isUp()});
+		logger.trace("Client Association [{}]", clientAssociation);
+	}
     defer();
   }
 
@@ -316,6 +323,10 @@ public class SCTPTransportClient {
 
   public InetSocketAddress getDestAddress() {
     return this.destAddress;
+  }
+  
+  public void setClientAssociationName(String clientAssociationName) {
+	this.clientAssociationName = clientAssociationName;
   }
 
   public void setDestAddress(InetSocketAddress address) {

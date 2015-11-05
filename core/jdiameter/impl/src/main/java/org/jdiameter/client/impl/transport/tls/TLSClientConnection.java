@@ -72,7 +72,7 @@ public class TLSClientConnection implements IConnection {
   private String cachedKey = null;
 
   public TLSClientConnection(Configuration config, IConcurrentFactory concurrentFactory, InetAddress remoteAddress, int remotePort, InetAddress localAddress,
-      int localPort, IMessageParser parser, String ref) {
+      int localPort, String associationName, IMessageParser parser, String ref) {
     this.createdTime = System.currentTimeMillis();
     this.client = new TLSTransportClient(this, concurrentFactory, parser);
     this.client.setDestAddress(new InetSocketAddress(remoteAddress, remotePort));
@@ -91,7 +91,7 @@ public class TLSClientConnection implements IConnection {
   }
 
   public TLSClientConnection(Configuration config, IConcurrentFactory concurrentFactory, InetAddress remoteAddress, int remotePort, InetAddress localAddress,
-      int localPort, IConnectionListener listener, IMessageParser parser, String ref) {
+      int localPort, String associationName, IConnectionListener listener, IMessageParser parser, String ref) {
     this.createdTime = System.currentTimeMillis();
     this.listeners.add(listener);
 

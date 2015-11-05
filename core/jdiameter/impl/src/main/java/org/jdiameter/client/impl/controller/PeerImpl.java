@@ -257,13 +257,13 @@ public class PeerImpl extends AbstractPeer implements IPeer {
     }
   };
 
-  public PeerImpl(final PeerTableImpl table, int rating, URI remotePeer, String ip,  String portRange, IMetaData metaData, Configuration config,
+  public PeerImpl(final PeerTableImpl table, int rating, URI remotePeer, String ip,  String portRange, String associationName, IMetaData metaData, Configuration config,
       Configuration peerConfig, IFsmFactory fsmFactory, ITransportLayerFactory trFactory, IStatisticManager statisticFactory,
       IConcurrentFactory concurrentFactory, IMessageParser parser, final ISessionDatasource sessionDataSource) throws InternalException, TransportException {
-    this(table, rating, remotePeer, ip, portRange, metaData, config, peerConfig, fsmFactory, trFactory, parser, statisticFactory, concurrentFactory, null, sessionDataSource);
+    this(table, rating, remotePeer, ip, portRange, associationName, metaData, config, peerConfig, fsmFactory, trFactory, parser, statisticFactory, concurrentFactory, null, sessionDataSource);
   }
 
-  protected PeerImpl(final PeerTableImpl table, int rating, URI remotePeer, String ip, String portRange, IMetaData metaData,
+  protected PeerImpl(final PeerTableImpl table, int rating, URI remotePeer, String ip, String portRange, String associationName, IMetaData metaData,
       Configuration config, Configuration peerConfig, IFsmFactory fsmFactory, ITransportLayerFactory trFactory,
       IMessageParser parser, IStatisticManager statisticFactory, IConcurrentFactory concurrentFactory,
       IConnection connection, final ISessionDatasource sessionDataSource) throws InternalException, TransportException {
@@ -353,7 +353,7 @@ public class PeerImpl extends AbstractPeer implements IPeer {
         }
         logger.debug("Create connection with localAddress=[{}]; localPort=[{}]", localAddress, localPort);
       }
-      this.connection = trFactory.createConnection(remoteAddress, concurrentFactory, port, localAddress, localPort, connListener, ref);
+      this.connection = trFactory.createConnection(remoteAddress, concurrentFactory, port, localAddress, localPort, associationName, connListener, ref);
     }
     else {
       this.connection = connection;

@@ -27,6 +27,7 @@ import static org.jdiameter.client.impl.helpers.Parameters.PeerLocalPortRange;
 import static org.jdiameter.client.impl.helpers.Parameters.PeerName;
 import static org.jdiameter.client.impl.helpers.Parameters.PeerRating;
 import static org.jdiameter.client.impl.helpers.Parameters.StopTimeOut;
+import static org.jdiameter.client.impl.helpers.Parameters.PeerAssociationName;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -37,6 +38,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicLong;
+
 import org.jdiameter.api.Avp;
 import org.jdiameter.api.AvpDataException;
 import org.jdiameter.api.Configuration;
@@ -69,6 +71,8 @@ import org.jdiameter.common.api.statistic.IStatisticManager;
 import org.jdiameter.common.api.statistic.IStatisticRecord;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.sun.nio.sctp.PeerAddressChangeNotification;
 
 /**
  *
@@ -121,9 +125,10 @@ public class PeerTableImpl implements IPeerTable {
           int rating = peerConfig.getIntValue(PeerRating.ordinal(), 0);
           String ip = peerConfig.getStringValue(PeerIp.ordinal(), null);
           String portRange = peerConfig.getStringValue(PeerLocalPortRange.ordinal(), null);
+          String associationName = peerConfig.getStringValue(PeerAssociationName.ordinal(), null);
           try {
             // create predefined peer
-            IPeer peer = (IPeer) createPeer(rating, uri, ip, portRange, metaData, globalConfig, peerConfig, fsmFactory, transportFactory, statisticFactory, concurrentFactory, parser);
+            IPeer peer = (IPeer) createPeer(rating, uri, ip, portRange, associationName, metaData, globalConfig, peerConfig, fsmFactory, transportFactory, statisticFactory, concurrentFactory, parser);
             if (peer != null) {
               //NOTE: this depends on conf, in normal case realm is younger part of FQDN, but in some cases
               //conf peers may contain IPs only... sucks.
@@ -140,10 +145,10 @@ public class PeerTableImpl implements IPeerTable {
     }
   }
 
-  protected Peer createPeer(int rating, String uri, String ip, String portRange, MetaData metaData, Configuration config, Configuration peerConfig, 
+  protected Peer createPeer(int rating, String uri, String ip, String portRange, String associationName, MetaData metaData, Configuration config, Configuration peerConfig, 
       IFsmFactory fsmFactory, ITransportLayerFactory transportFactory, IStatisticManager statisticFactory, IConcurrentFactory concurrentFactory, IMessageParser parser)  
           throws InternalException, TransportException, URISyntaxException, UnknownServiceException {
-    return new PeerImpl(this, rating, new URI(uri), ip, portRange, metaData.unwrap(IMetaData.class), config,
+    return new PeerImpl(this, rating, new URI(uri), ip, portRange, associationName, metaData.unwrap(IMetaData.class), config,
         peerConfig, fsmFactory, transportFactory, statisticFactory, concurrentFactory, parser, this.sessionDatasource);
   }
 

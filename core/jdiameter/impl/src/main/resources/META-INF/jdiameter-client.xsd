@@ -330,6 +330,7 @@
                    <xsi:attribute name="portRange" type="xsi:string" use="optional"/>
                    <!-- must match SecurityData.name -->
                    <xsi:attribute name="security_ref" type="xsi:string" use="optional"/>
+                   <xsi:attribute name="association_name" type="xsi:string" use="optional"/>
                </xsi:complexType>
             </xsi:element>
         </xsi:sequence>

@@ -416,6 +416,7 @@
                    <xsi:attribute name="attempt_connect" type="xsi:boolean" use="required"/>
                    <xsi:attribute name="rating" type="xsi:integer" use="required"/>
                    <xsi:attribute name="security_ref" type="xsi:string" use="optional"/>
+                   <xsi:attribute name="association_name" type="xsi:string" use="optional"/>
                </xsi:complexType>
             </xsi:element>
         </xsi:sequence>

@@ -30,6 +30,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+
 import org.jdiameter.api.AvpDataException;
 import org.jdiameter.api.Configuration;
 import org.jdiameter.api.InternalException;
@@ -69,22 +70,24 @@ public class SCTPClientConnection implements IConnection {
   }
 
   public SCTPClientConnection(Configuration config, IConcurrentFactory concurrentFactory, InetAddress remoteAddress,
-      int remotePort, InetAddress localAddress, int localPort, IMessageParser parser, String ref) {
+      int remotePort, InetAddress localAddress, int localPort, String associationName, IMessageParser parser, String ref) {
     this(parser);
 
     logger.debug("SCTP Client constructor. Remote [{}:{}] Local [{}:{}]", new Object[] { remoteAddress, remotePort,
         localAddress, localPort });
+    client.setClientAssociationName(associationName);
     client.setDestAddress(new InetSocketAddress(remoteAddress, remotePort));
     client.setOrigAddress(new InetSocketAddress(localAddress, localPort));
     client.setConfig(config);
   }
 
   public SCTPClientConnection(Configuration config, IConcurrentFactory concurrentFactory, InetAddress remoteAddress,
-      int remotePort, InetAddress localAddress, int localPort, IConnectionListener listener, IMessageParser parser, String ref) {
+      int remotePort, InetAddress localAddress, int localPort, String associationName, IConnectionListener listener, IMessageParser parser, String ref) {
     this(parser);
 
     logger.debug("SCTP Client constructor (with ref). Remote [{}:{}] Local [{}:{}]", new Object[] { remoteAddress, remotePort,
         localAddress, localPort });
+    client.setClientAssociationName(associationName);
     client.setDestAddress(new InetSocketAddress(remoteAddress, remotePort));
     client.setOrigAddress(new InetSocketAddress(localAddress, localPort));
     client.setConfig(config);
