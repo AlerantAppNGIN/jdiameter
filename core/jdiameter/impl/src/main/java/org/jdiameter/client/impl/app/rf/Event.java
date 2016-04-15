@@ -35,9 +35,9 @@ import org.jdiameter.api.rf.events.RfAccountingRequest;
  * @author <a href="mailto:baranowb@gmail.com"> Bartosz Baranowski </a>
  * @author <a href="mailto:brainslog@gmail.com"> Alexandre Mendonca </a>
  */
-class Event implements StateEvent {
+public class Event implements StateEvent {
 
-  enum Type{
+  public enum Type{
     SEND_EVENT_RECORD,
     SEND_START_RECORD,
     SEND_INTERIM_RECORD,
@@ -50,7 +50,7 @@ class Event implements StateEvent {
   Type type;
   AppEvent data;
 
-  Event(Type type) {
+  public Event(Type type) {
     this.type = type;
   }
 
