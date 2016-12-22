@@ -72,6 +72,8 @@ import static org.jdiameter.client.api.fsm.EventTypes.DWR_EVENT;
 import static org.jdiameter.client.api.fsm.EventTypes.INTERNAL_ERROR;
 import static org.jdiameter.client.api.fsm.EventTypes.RECEIVE_MSG_EVENT;
 import static org.jdiameter.client.api.fsm.EventTypes.STOP_EVENT;
+import static org.jdiameter.client.impl.helpers.Parameters.PeerIp;
+import static org.jdiameter.client.impl.helpers.Parameters.PeerSecondaryIp;
 import static org.jdiameter.client.impl.helpers.Parameters.SecurityRef;
 import static org.jdiameter.client.impl.helpers.Parameters.UseUriAsFqdn;
 
@@ -283,6 +285,17 @@ public class PeerImpl extends AbstractPeer implements IPeer {
     catch (UnknownHostException e) {
       throw new TransportException("Unable to retrieve host", TransportError.Internal, e);
     }
+    InetAddress secondaryRemoteAddress = null;
+    String secondaryIp = peerConfig.getStringValue(PeerSecondaryIp.ordinal(), null);
+    if (secondaryIp != null) {
+        try {
+          secondaryRemoteAddress = InetAddress.getByName(secondaryIp);
+        }
+        catch (UnknownHostException e) {
+          throw new TransportException("Unable to retrieve secondary host", TransportError.Internal, e);
+        }
+    }
+
     IContext actionContext = getContext();
     this.fsm = fsmFactory.createInstanceFsm(actionContext, concurrentFactory, config);
     this.fsm.addStateChangeNotification(
@@ -360,7 +373,11 @@ public class PeerImpl extends AbstractPeer implements IPeer {
       this.connection.addConnectionListener(connListener);
     }
     this.parser = parser;
-    this.addresses = new InetAddress[] {remoteAddress};
+    if (secondaryRemoteAddress != null) {
+        this.addresses = new InetAddress[] {remoteAddress, secondaryRemoteAddress};
+    } else {
+        this.addresses = new InetAddress[] {remoteAddress};
+    }
     this.useUriAsFQDN = config.getBooleanValue(UseUriAsFqdn.ordinal(), (Boolean) UseUriAsFqdn.defValue());
   }
 

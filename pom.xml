@@ -16,7 +16,7 @@
 
 	<name>Mobicents :: Diameter :: ${pom.artifactId}</name>
 	<description>Mobicents Diameter</description>
-	<url>http://code.google.com/p/jdiameter/</url>
+	<url>https://github.com/RestComm/jdiameter</url>
 
 	<ciManagement>
 		<system>Hudson</system>
@@ -160,10 +160,10 @@
 		</pluginRepository>
 	</pluginRepositories>
 
-	<scm>
-		<connection>scm:git:https://code.google.com/p/jdiameter/</connection>
-		<developerConnection>scm:git:https://code.google.com/p/jdiameter/</developerConnection>
-		<url>https://code.google.com/p/jdiameter/</url>
-	</scm>
+  <scm>
+    <connection>scm:git:git@github.com:RestComm/jdiameter.git</connection>
+    <developerConnection>scm:git:https://github.com/RestComm/jdiameter.git</developerConnection>
+    <url>https://github.com/RestComm/jdiameter</url>
+  </scm>
 
 </project>

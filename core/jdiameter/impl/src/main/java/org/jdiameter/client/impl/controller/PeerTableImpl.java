@@ -22,12 +22,13 @@
 
 package org.jdiameter.client.impl.controller;
 
+import static org.jdiameter.client.impl.helpers.Parameters.PeerAssociationName;
 import static org.jdiameter.client.impl.helpers.Parameters.PeerIp;
 import static org.jdiameter.client.impl.helpers.Parameters.PeerLocalPortRange;
 import static org.jdiameter.client.impl.helpers.Parameters.PeerName;
 import static org.jdiameter.client.impl.helpers.Parameters.PeerRating;
+import static org.jdiameter.client.impl.helpers.Parameters.PeerSecondaryIp;
 import static org.jdiameter.client.impl.helpers.Parameters.StopTimeOut;
-import static org.jdiameter.client.impl.helpers.Parameters.PeerAssociationName;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -71,8 +72,6 @@ import org.jdiameter.common.api.statistic.IStatisticManager;
 import org.jdiameter.common.api.statistic.IStatisticRecord;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.sun.nio.sctp.PeerAddressChangeNotification;
 
 /**
  *
@@ -403,5 +402,31 @@ public class PeerTableImpl implements IPeerTable {
       // TODO ? t.start(); 
       return t;
     }
+  }
+
+  public static String lookUpSecondaryIpByPeerAssocName(Configuration globalConfig, String peerAssociationName) {
+      if (globalConfig == null || peerAssociationName == null) {
+          return null;
+      }
+
+      String secondaryIp = null;
+      Configuration[] peers = globalConfig.getChildren(Parameters.PeerTable.ordinal());
+      if (peers != null && peers.length > 0) {
+          for (Configuration peerConfig : peers) {
+              if (peerConfig.isAttributeExist(PeerAssociationName.ordinal())) {
+                  String assocName = peerConfig.getStringValue(PeerAssociationName.ordinal(), null);
+                  if (peerAssociationName.equals(assocName)) {
+                      secondaryIp = peerConfig.getStringValue(PeerSecondaryIp.ordinal(), null);
+                      break;
+                  }
+              }
+          }
+      }
+      if (secondaryIp != null) {
+          logger.debug("Found secondaryIp={} to association={}", new Object[]{secondaryIp, peerAssociationName});
+      } else {
+          logger.debug("No secondaryIp found to association={}", new Object[]{peerAssociationName});
+      }
+      return secondaryIp;
   }
 }

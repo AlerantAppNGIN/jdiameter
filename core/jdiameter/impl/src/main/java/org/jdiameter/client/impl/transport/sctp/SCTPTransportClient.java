@@ -31,6 +31,7 @@ import java.util.List;
 import org.jdiameter.api.AvpDataException;
 import org.jdiameter.api.Configuration;
 import org.jdiameter.client.api.io.NotInitializedException;
+import org.jdiameter.client.impl.controller.PeerTableImpl;
 import org.jdiameter.client.impl.helpers.AppConfiguration;
 import org.jdiameter.client.impl.helpers.ExtensionPoint;
 import org.jdiameter.client.impl.helpers.Parameters;
@@ -39,7 +40,7 @@ import org.mobicents.protocols.api.AssociationListener;
 import org.mobicents.protocols.api.IpChannelType;
 import org.mobicents.protocols.api.Management;
 import org.mobicents.protocols.api.PayloadData;
-import org.mobicents.protocols.sctp.ManagementImpl;
+import org.mobicents.protocols.sctp.multiclient.MultiManagementImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -51,7 +52,8 @@ import org.slf4j.LoggerFactory;
 public class SCTPTransportClient {
 
   private static final int SCTP_CONNECT_DELAY = 1000;
-  private static final int CONNECT_DELAY = 5000;  
+  //private static final int CONNECT_DELAY = 5000;
+  private static final int CONNECT_TIMEOUT = 60000;
   private static final int DELAY = 50;  
 
   private Management management = null;
@@ -152,10 +154,20 @@ public class SCTPTransportClient {
         }
         String[] extraHostAddresses = extraHostAddressesList.toArray(new String[extraHostAddressesList.size()]);
 
-        
-        this.clientAssociation = this.management.addAssociation(origAddress.getAddress().getHostAddress(),
+        //FIXME: SCTP API change is required until the we have to "wire" the management implementation class
+        String secondaryPeerIp = PeerTableImpl.lookUpSecondaryIpByPeerAssocName(config, clientAssociationName);
+        logger.debug("Management class={}, clientAssociationName={}, secondaryPeerIp={} ", new Object[] {this.management.getClass(), clientAssociation, secondaryPeerIp});
+        if (this.management instanceof MultiManagementImpl && secondaryPeerIp != null) {
+            logger.debug("SCTP_TRANSPORT using MultiManagementImpl, secondaryPeerIp={}", new Object[]{secondaryPeerIp});
+            this.clientAssociation = ((MultiManagementImpl) this.management).addAssociation(origAddress.getAddress().getHostAddress(),
+                    origAddress.getPort(), destAddress.getAddress().getHostAddress(), destAddress.getPort(), clientAssociationName,
+                    IpChannelType.SCTP, extraHostAddresses, secondaryPeerIp);
+        } else {
+            logger.debug("SCTP_TRANSPORT - secondaryPeerIp is not supported");
+            this.clientAssociation = this.management.addAssociation(origAddress.getAddress().getHostAddress(),
             origAddress.getPort(), destAddress.getAddress().getHostAddress(), destAddress.getPort(), clientAssociationName,
             IpChannelType.SCTP, extraHostAddresses);
+        }
       }
       else {
         logger.debug("CLIENT ASSOCIATION '{}'. Origin Address [{}:{}] <=> Dest Address [{}:{}] already present. Re-using it.",
@@ -201,7 +213,7 @@ public class SCTPTransportClient {
   }
 
   private void defer() throws IOException {
-    final long endTStamp = System.currentTimeMillis() + CONNECT_DELAY;
+    final long endTStamp = System.currentTimeMillis() + CONNECT_TIMEOUT;
     while(clientAssociation.isStarted() && !clientAssociation.isConnected() && !clientAssociation.isUp()) {
       try {
         Thread.sleep(DELAY);
