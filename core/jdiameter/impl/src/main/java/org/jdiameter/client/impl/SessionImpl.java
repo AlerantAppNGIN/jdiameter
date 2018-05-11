@@ -29,6 +29,8 @@ import org.jdiameter.client.api.IRequest;
 import org.jdiameter.client.api.ISession;
 import org.jdiameter.client.api.parser.IMessageParser;
 import org.jdiameter.common.api.data.ISessionDatasource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.concurrent.TimeUnit;
 
@@ -40,6 +42,8 @@ import java.util.concurrent.TimeUnit;
  * @author <a href="mailto:brainslog@gmail.com"> Alexandre Mendonca </a>
  */
 public class SessionImpl extends BaseSessionImpl implements ISession {
+
+  private static final Logger logger = LoggerFactory.getLogger(SessionImpl.class);
 
   SessionImpl(IContainer container) {
     setContainer(container);
@@ -135,7 +139,12 @@ public class SessionImpl extends BaseSessionImpl implements ISession {
     if (container != null) {
       container.removeSessionListener(sessionId);
       // FIXME
-      container.getAssemblerFacility().getComponentInstance(ISessionDatasource.class).removeSession(sessionId);
+      ISessionDatasource sessionDataSource = container.getAssemblerFacility().getComponentInstance(ISessionDatasource.class);
+      if (sessionDataSource.exists(sessionId)) {
+          sessionDataSource.removeSession(sessionId);
+      } else {
+          logger.warn("Session {} cannot be found in sessionDataSource {}", sessionId, sessionDataSource);
+      }
     }
     container = null;
     parser = null;
