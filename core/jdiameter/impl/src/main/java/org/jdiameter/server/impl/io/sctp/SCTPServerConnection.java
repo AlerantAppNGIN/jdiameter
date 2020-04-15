@@ -77,6 +77,7 @@ public class SCTPServerConnection implements IConnection {
 
     logger.debug("SCTP Server constructor for listening server @ {}:{}", localAddress, localPort);
     server.setOrigAddress(new InetSocketAddress(localAddress, localPort));
+    server.setConfig(config);
     server.startServer();
   }
 
@@ -90,6 +91,7 @@ public class SCTPServerConnection implements IConnection {
     server.setOrigAddress(new InetSocketAddress(localAddress, localPort));
     server.setDestAddress(new InetSocketAddress(remoteAddress, remotePort));
     server.setManagement(management);
+    server.setConfig(config);
     server.startNewRemoteConnection(globalServer, association, remoteAddress.getHostAddress(), remotePort);
   }
 

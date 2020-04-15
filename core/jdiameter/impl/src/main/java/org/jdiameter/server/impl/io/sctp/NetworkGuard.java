@@ -25,6 +25,8 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
+
+import org.jdiameter.api.Configuration;
 import org.jdiameter.client.api.parser.IMessageParser;
 import org.jdiameter.common.api.concurrent.DummyConcurrentFactory;
 import org.jdiameter.common.api.concurrent.IConcurrentFactory;
@@ -54,6 +56,7 @@ public class NetworkGuard implements INetworkGuard {
   protected List<SCTPServerConnection> serverConnections;
   
   protected InetAddress[] localAddresses;
+  private Configuration config;
 
   @Deprecated
   public NetworkGuard(InetAddress inetAddress, int port, IMessageParser parser) throws Exception {
@@ -63,29 +66,63 @@ public class NetworkGuard implements INetworkGuard {
   public NetworkGuard(InetAddress inetAddress, int port, IConcurrentFactory concurrentFactory, IMessageParser parser, IMetaData data) throws Exception {
     this(new InetAddress[]{inetAddress}, port, concurrentFactory, parser, data);
   }
-
+  
   public NetworkGuard(InetAddress[] inetAddresses, int port, IConcurrentFactory concurrentFactory, IMessageParser parser, IMetaData data) throws Exception {
-    this.port = port;
-    this.localAddresses = inetAddresses;
-    this.parser = parser;
-    this.concurrentFactory = concurrentFactory == null ? new DummyConcurrentFactory() : concurrentFactory;
-    this.serverConnections = new ArrayList<SCTPServerConnection>();
+	  this(inetAddresses, port, concurrentFactory, parser, data, null);
+	  /*
+	    this.port = port;
+	    this.localAddresses = inetAddresses;
+	    this.parser = parser;
+	    this.concurrentFactory = concurrentFactory == null ? new DummyConcurrentFactory() : concurrentFactory;
+	    this.serverConnections = new ArrayList<SCTPServerConnection>();
 
-    try {
-      for (InetAddress ia : inetAddresses) {
-        final SCTPServerConnection sctpServerConnection = new SCTPServerConnection(null, ia, port, parser, null, this);
-        this.serverConnections.add(sctpServerConnection);
-      }
-    }
-    catch (Exception exc) {
-      try{
-        destroy();
-      }
-      catch(Exception e) {
-        // ignore
-      }
-      throw new Exception(exc);
-    }
+	    try {
+	      for (InetAddress ia : inetAddresses) {
+	        final SCTPServerConnection sctpServerConnection = new SCTPServerConnection(null, ia, port, parser, null, this);
+	        this.serverConnections.add(sctpServerConnection);
+	      }
+	    }
+	    catch (Exception exc) {
+	      try{
+	        destroy();
+	      }
+	      catch(Exception e) {
+	        // ignore
+	      }
+	      throw new Exception(exc);
+	    }
+	    */
+  }
+  
+
+  public NetworkGuard(InetAddress[] inetAddresses, int port, IConcurrentFactory concurrentFactory, IMessageParser parser, IMetaData data, Configuration config) throws Exception {
+	  this.port = port;
+	  this.localAddresses = inetAddresses;
+	  this.parser = parser;
+	  this.concurrentFactory = concurrentFactory == null ? new DummyConcurrentFactory() : concurrentFactory;
+	  this.serverConnections = new ArrayList<SCTPServerConnection>();
+
+	  try {
+		  //TODO: felülvizsgálni
+		  if (inetAddresses != null && inetAddresses.length > 0) {
+			  final SCTPServerConnection sctpServerConnection = new SCTPServerConnection(config, inetAddresses[0], port, parser, null, this);
+			  this.serverConnections.add(sctpServerConnection);
+			  
+		  }
+		  /*
+		  for (InetAddress ia : inetAddresses) {
+			  final SCTPServerConnection sctpServerConnection = new SCTPServerConnection(config, ia, port, parser, null, this);
+			  this.serverConnections.add(sctpServerConnection);
+		  }
+		  */
+	  } catch (Exception exc) {
+		  try{
+			  destroy();
+		  } catch(Exception e) {
+			  // ignore
+		  }
+		  throw new Exception(exc);
+	  }
   }
   
   public void run() {

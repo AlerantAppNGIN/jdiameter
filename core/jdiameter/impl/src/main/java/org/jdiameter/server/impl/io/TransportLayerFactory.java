@@ -99,7 +99,7 @@ public class TransportLayerFactory extends org.jdiameter.client.impl.transport.T
     try {
       // TODO: this is bad practice, IConnection is interface and this code enforces constructor type to be present!
       networkGuardConstructor = this.networkGuardClass.getConstructor(InetAddress[].class, Integer.TYPE, IConcurrentFactory.class,
-          IMessageParser.class, IMetaData.class);
+          IMessageParser.class, IMetaData.class, Configuration.class);
 
     }
     catch (Exception e) {
@@ -109,7 +109,7 @@ public class TransportLayerFactory extends org.jdiameter.client.impl.transport.T
 
   public INetworkGuard createNetworkGuard(InetAddress inetAddress, int port) throws TransportException {
     try {
-      return networkGuardConstructor.newInstance(inetAddress, port, this.concurrentFactory, this.parser, this.metaData);
+      return networkGuardConstructor.newInstance(new InetAddress[]{inetAddress}, port, this.concurrentFactory, this.parser, this.metaData, config);
     }
     catch (Exception e) {
       throw new TransportException(TransportError.NetWorkError, e);
@@ -119,7 +119,7 @@ public class TransportLayerFactory extends org.jdiameter.client.impl.transport.T
   public INetworkGuard createNetworkGuard(InetAddress inetAddress, final int port, final INetworkConnectionListener listener) throws TransportException {
     INetworkGuard guard;
     try {
-      guard = networkGuardConstructor.newInstance(inetAddress, port, this.concurrentFactory, this.parser, this.metaData);
+      guard = networkGuardConstructor.newInstance(new InetAddress[]{inetAddress}, port, this.concurrentFactory, this.parser, this.metaData, config);
     }
     catch (Exception e) {
       throw new TransportException(TransportError.NetWorkError, e);
@@ -130,7 +130,7 @@ public class TransportLayerFactory extends org.jdiameter.client.impl.transport.T
 
   public INetworkGuard createNetworkGuard(InetAddress[] inetAddress, int port) throws TransportException {
     try {
-      return networkGuardConstructor.newInstance(inetAddress, port, this.concurrentFactory, this.parser, this.metaData);
+      return networkGuardConstructor.newInstance(inetAddress, port, this.concurrentFactory, this.parser, this.metaData, config);
     }
     catch (Exception e) {
       throw new TransportException(TransportError.NetWorkError, e);
@@ -140,7 +140,7 @@ public class TransportLayerFactory extends org.jdiameter.client.impl.transport.T
   public INetworkGuard createNetworkGuard(InetAddress[] inetAddress, int port, INetworkConnectionListener listener) throws TransportException {
     INetworkGuard guard;
     try {
-      guard = networkGuardConstructor.newInstance(inetAddress, port, this.concurrentFactory, this.parser, this.metaData);
+      guard = networkGuardConstructor.newInstance(inetAddress, port, this.concurrentFactory, this.parser, this.metaData, config);
     }
     catch (Exception e) {
       throw new TransportException(TransportError.NetWorkError, e);

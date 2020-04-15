@@ -41,7 +41,8 @@
 			<groupId>commons-pool</groupId>
 			<artifactId>commons-pool</artifactId>
 			<version>${commons-pool.version}</version>
-		</dependency>
+		</dependency>		
+		<!--
 		<dependency>
 			<groupId>org.mobicents.protocols.sctp</groupId>
 			<artifactId>sctp-impl</artifactId>
@@ -51,6 +52,17 @@
 			<groupId>org.mobicents.protocols.sctp</groupId>
 			<artifactId>sctp-api</artifactId>
 			<version>1.5.0.FINAL</version>
+		</dependency>
+		-->
+		<dependency>
+			<groupId>org.mobicents.protocols.sctp</groupId>
+			<artifactId>sctp-impl</artifactId>
+			<version>1.7.0-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>org.mobicents.protocols.sctp</groupId>
+			<artifactId>sctp-api</artifactId>
+			<version>1.7.0-SNAPSHOT</version>
 		</dependency>
 	</dependencies>
 

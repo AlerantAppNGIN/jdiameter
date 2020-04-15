@@ -45,6 +45,7 @@ package org.jdiameter.server.impl.io.tcp;
 
 import static org.jdiameter.server.impl.helpers.Parameters.BindDelay;
 
+import org.jdiameter.api.Configuration;
 import org.jdiameter.client.api.parser.IMessageParser;
 import org.jdiameter.client.impl.transport.tcp.TCPClientConnection;
 import org.jdiameter.common.api.concurrent.DummyConcurrentFactory;
@@ -106,10 +107,16 @@ public class NetworkGuard implements INetworkGuard {
     this(new InetAddress[]{inetAddress}, port, concurrentFactory, parser, data);
   }
 
+  public NetworkGuard(InetAddress[] inetAddress, int port,
+	      IConcurrentFactory concurrentFactory, IMessageParser parser,
+	      IMetaData data) throws Exception {
+	  this(inetAddress, port, concurrentFactory, parser, data, null);
+  }
+
   
   public NetworkGuard(InetAddress[] inetAddress, int port,
       IConcurrentFactory concurrentFactory, IMessageParser parser,
-      IMetaData data) throws Exception {
+      IMetaData data, Configuration config) throws Exception {
     this.port = port;
     this.parser = parser;
     this.concurrentFactory = concurrentFactory == null ? new DummyConcurrentFactory() : concurrentFactory;

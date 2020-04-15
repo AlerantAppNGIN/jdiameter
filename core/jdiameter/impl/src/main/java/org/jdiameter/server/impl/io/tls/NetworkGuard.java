@@ -62,8 +62,12 @@ public class NetworkGuard implements INetworkGuard, Runnable {
   private Configuration localPeerSSLConfig;
   private Thread thread;
   private String secRef;
+  
+  public NetworkGuard(InetAddress[] inetAddress, int port, IConcurrentFactory concurrentFactory, IMessageParser parser, IMetaData data) throws Exception {
+	  this(inetAddress, port, concurrentFactory, parser, data, null);
+  }  
 
-  public NetworkGuard(InetAddress inetAddress, int port, IConcurrentFactory concurrentFactory, IMessageParser parser, IMetaData data) throws Exception {
+  public NetworkGuard(InetAddress[] inetAddress, int port, IConcurrentFactory concurrentFactory, IMessageParser parser, IMetaData data, Configuration config) throws Exception {
     this.port = port;
     this.parser = parser;
     this.concurrentFactory = concurrentFactory == null ? new DummyConcurrentFactory() : concurrentFactory;
@@ -89,7 +93,7 @@ public class NetworkGuard implements INetworkGuard, Runnable {
       // this.serverSocket = (SSLServerSocket) sslServerSocketFactory.createServerSocket();
 
       this.serverSocket = new ServerSocket();
-      this.serverSocket.bind(new InetSocketAddress(inetAddress, port));
+      this.serverSocket.bind(new InetSocketAddress(inetAddress[0], port));
 
       this.isWork = true;
       logger.info("Open server socket {} ", serverSocket);

@@ -19,11 +19,17 @@
 
 package org.jdiameter.server.impl.io.sctp;
 
+import static org.jdiameter.client.impl.helpers.Parameters.OwnIPAddress;
+import static org.jdiameter.server.impl.helpers.Parameters.OwnIPAddresses;
+
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.jdiameter.api.AvpDataException;
+import org.jdiameter.api.Configuration;
 import org.jdiameter.client.api.io.NotInitializedException;
 import org.mobicents.protocols.api.Association;
 import org.mobicents.protocols.api.AssociationListener;
@@ -56,6 +62,8 @@ public class SCTPTransportServer {
   private static final Logger logger = LoggerFactory.getLogger(SCTPTransportServer.class);
   private int payloadProtocolId = 0;
   private int streamNumber = 0;
+  
+  private Configuration config;
 
   public SCTPTransportServer() {
   }
@@ -150,11 +158,31 @@ public class SCTPTransportServer {
           break;
         }
       }
+      
+      //KB -- getting the extraHostAddresses from the configuration -- START
+      Configuration[] ipAddresses = config.getChildren(OwnIPAddresses.ordinal());
+      List<String> extraHostAddressesList = new ArrayList<String>();
+      if (ipAddresses != null) {
+        for (Configuration address : ipAddresses) {
+          if (address != null) {
+            String tmp = address.getStringValue(OwnIPAddress.ordinal(), null);
+            if (tmp != null && tmp.length()>0) {
+          	if (!origAddress.getAddress().getHostAddress().equals(tmp)){
+          		logger.debug("Extra host address for SCTP multi-homing: "+tmp);
+          		extraHostAddressesList.add(tmp);
+              }
+            }
+          }
+        }
+      }
+      String[] extraHostAddresses = extraHostAddressesList.toArray(new String[extraHostAddressesList.size()]);
+    //KB -- getting the extraHostAddresses from the configuration -- FINISH
 
       // We don't have any, let's create it
       if (server == null) {
+    	  //KB: using the extraHostAddresses
         server = this.management.addServer(serverName, origAddress.getAddress().getHostAddress(), origAddress.getPort(),
-            IpChannelType.SCTP, true, 10, null);
+            IpChannelType.SCTP, true, 10, ((extraHostAddresses.length > 0) ? extraHostAddresses : null));
       }
 
       for (String assocName : server.getAssociations()) {
@@ -167,7 +195,7 @@ public class SCTPTransportServer {
 
       if (serverAssociation == null) {
         serverAssociation = this.management.addServerAssociation(origAddress.getAddress().getHostAddress(), origAddress.getPort(), serverName,
-            serverAssociationName, IpChannelType.SCTP);
+            serverAssociationName, IpChannelType.SCTP, ((extraHostAddresses.length > 0) ? extraHostAddresses : null));
       }
 
       this.management.setServerListener(new ServerEventListener());
@@ -401,5 +429,9 @@ public class SCTPTransportServer {
       return false;
     }
     return this.remoteClientAssociation.isConnected();
+  }
+  
+  public void setConfig(Configuration config){
+	  this.config = config;
   }
 }
