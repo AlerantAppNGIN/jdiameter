@@ -74,6 +74,7 @@ import static org.jdiameter.client.impl.helpers.Parameters.OwnProductName;
 import static org.jdiameter.client.impl.helpers.Parameters.OwnRealm;
 import static org.jdiameter.client.impl.helpers.Parameters.OwnVendorID;
 import static org.jdiameter.client.impl.helpers.Parameters.OwnSctpStackName;
+import static org.jdiameter.client.impl.helpers.Parameters.ServerAssociationName;
 import static org.jdiameter.client.impl.helpers.Parameters.PeerAssociationName;
 import static org.jdiameter.client.impl.helpers.Parameters.PeerIp;
 import static org.jdiameter.client.impl.helpers.Parameters.PeerFSMThreadCount;
@@ -278,6 +279,9 @@ public class XMLConfiguration extends EmptyConfiguration {
       }
       if (nodeName.equals("SctpStackName")) {
           add(OwnSctpStackName, getValue(c.item(i)));
+      }
+      if (nodeName.equals("ServerAssociationName")) {
+    	  add(ServerAssociationName, getValue(c.item(i)));
       }
     }
   }

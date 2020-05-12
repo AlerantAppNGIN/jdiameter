@@ -73,6 +73,12 @@ public class Parameters extends Ordinal {
    * Local peer sctp stack name
    */
   public static final Parameters OwnSctpStackName = new Parameters("OwnSctpStackName", String.class, "");
+
+  /**
+   * Association name of the local server
+   */
+  public static final Parameters ServerAssociationName = new Parameters("ServerAssociationName", String.class, "");
+
   
   /**
    * Task executor task queue size  property 

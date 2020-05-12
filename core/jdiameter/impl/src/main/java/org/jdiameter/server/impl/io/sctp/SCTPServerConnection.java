@@ -76,6 +76,7 @@ public class SCTPServerConnection implements IConnection {
     this(parser, guard);
 
     logger.debug("SCTP Server constructor for listening server @ {}:{}", localAddress, localPort);
+    logger.debug("SCTP Server constructor for listening server - using the following configuration: {}", (config != null ? config.toString() :""));
     server.setOrigAddress(new InetSocketAddress(localAddress, localPort));
     server.setConfig(config);
     server.startServer();
@@ -88,6 +89,7 @@ public class SCTPServerConnection implements IConnection {
     this(parser, guard);
 
     logger.debug("SCTP Server constructor for remote client connections @ {}:{} <=> {}:{}", new Object[]{localAddress, localPort, remoteAddress, remotePort});
+    logger.debug("SCTP Server constructor for remote client connections - using the following configuration: {}", (config != null ? config.toString() :""));
     server.setOrigAddress(new InetSocketAddress(localAddress, localPort));
     server.setDestAddress(new InetSocketAddress(remoteAddress, remotePort));
     server.setManagement(management);

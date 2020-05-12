@@ -512,6 +512,7 @@ public class XMLConfiguration extends EmptyConfiguration {
       if (nodeName.equals("Applications")) addApplications(c.item(i));
       if (nodeName.equals("OverloadMonitor")) addOverloadMonitor(c.item(i));
       if (nodeName.equals("SctpStackName")) add(OwnSctpStackName, getValue(c.item(i)));
+      if (nodeName.equals("ServerAssociationName")) add(ServerAssociationName, getValue(c.item(i)));
     }
   }
 

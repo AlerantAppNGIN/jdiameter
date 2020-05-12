@@ -86,6 +86,14 @@
                     <xsi:attribute name="value" type="xsi:string" use="required" />
                 </xsi:complexType>
             </xsi:element>
+            <xsi:element name="ServerAssociationName" minOccurs="0" maxOccurs="1">
+                <xsi:annotation>
+                    <xsi:documentation>Name of the Server Association (optional)</xsi:documentation>
+                </xsi:annotation>
+                <xsi:complexType>
+                    <xsi:attribute name="value" type="xsi:string" use="required" />
+                </xsi:complexType>
+            </xsi:element>                        
         </xsi:sequence>
         <!-- must match SecurityData.name -->
         <xsi:attribute name="security_ref"  type="xsi:string" use="optional"/>

@@ -100,6 +100,7 @@ public class NetworkGuard implements INetworkGuard {
 	  this.localAddresses = inetAddresses;
 	  this.parser = parser;
 	  this.concurrentFactory = concurrentFactory == null ? new DummyConcurrentFactory() : concurrentFactory;
+	  this.config = config;
 	  this.serverConnections = new ArrayList<SCTPServerConnection>();
 
 	  try {
@@ -158,7 +159,7 @@ public class NetworkGuard implements INetworkGuard {
       final int peerPort = association.getPeerPort();
       final String localAddress = association.getHostAddress();
       final int localPort = association.getHostPort();
-      SCTPServerConnection remoteClientConnection = new SCTPServerConnection(null, InetAddress.getByName(peerAddress),
+      SCTPServerConnection remoteClientConnection = new SCTPServerConnection(this.config, InetAddress.getByName(peerAddress),
           peerPort, InetAddress.getByName(localAddress), localPort, parser, null, this, globalServer, association, connection.getManagement());
       notifyListeners(remoteClientConnection);
     }

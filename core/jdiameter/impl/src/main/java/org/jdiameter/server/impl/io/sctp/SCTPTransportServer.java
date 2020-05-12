@@ -20,6 +20,7 @@
 package org.jdiameter.server.impl.io.sctp;
 
 import static org.jdiameter.client.impl.helpers.Parameters.OwnIPAddress;
+import static org.jdiameter.client.impl.helpers.Parameters.PeerName;
 import static org.jdiameter.server.impl.helpers.Parameters.OwnIPAddresses;
 
 import java.io.IOException;
@@ -31,6 +32,10 @@ import java.util.List;
 import org.jdiameter.api.AvpDataException;
 import org.jdiameter.api.Configuration;
 import org.jdiameter.client.api.io.NotInitializedException;
+import org.jdiameter.client.impl.helpers.AppConfiguration;
+import org.jdiameter.client.impl.helpers.ExtensionPoint;
+import org.jdiameter.client.impl.helpers.Parameters;
+import org.jdiameter.client.impl.transport.sctp.SctpClientManagementFactory;
 import org.mobicents.protocols.api.Association;
 import org.mobicents.protocols.api.AssociationListener;
 import org.mobicents.protocols.api.IpChannelType;
@@ -64,6 +69,7 @@ public class SCTPTransportServer {
   private int streamNumber = 0;
   
   private Configuration config;
+  private String usedManagementImplementation;
 
   public SCTPTransportServer() {
   }
@@ -92,7 +98,36 @@ public class SCTPTransportServer {
 
   public void startNewRemoteConnection(Server server, Association association, String peerAddress, int peerPort) {
     logger.debug("Initializing new Remote Connection '{}' -> '{}' ---> '{}:{}'", new Object[]{this.origAddress, this.destAddress, peerAddress, peerPort});
+    logger.debug("Server: {}", server);
+    logger.debug("Association: {}", association);
     remoteClientAssociationName = peerAddress + ":" + peerPort;
+    logger.debug("Default remote client association name: {}", remoteClientAssociationName);
+    
+    //If peerAddress is configured as a Peer in the PeerTable and it has an association name, then we will use that name instead of the default address:port format
+    //The localPortRange is disregarded in the configuration due to the fact that localPortRange is a client related parameter
+    if (config != null) {
+    Configuration[] peerTable = config.getChildren(Parameters.PeerTable.ordinal());
+	    if (peerTable != null && peerTable.length > 0) {
+	    	logger.debug("PeerTable not empty...");
+	    	String foundfoundAssociationName = null;
+	    	for(Configuration config : peerTable) {
+	    		logger.debug("Checking Peer: {}", config);
+	    		String configuredPeerIp = config.getStringValue(Parameters.PeerIp.ordinal(), "");
+	    		if (configuredPeerIp != null && !"".equals(configuredPeerIp) && configuredPeerIp.equals(peerAddress)) {
+	    			foundfoundAssociationName = config.getStringValue(Parameters.PeerAssociationName.ordinal(), remoteClientAssociationName);
+	    			break;
+	    		}
+	    	}
+	    	if (foundfoundAssociationName != null) {
+	    		remoteClientAssociationName = foundfoundAssociationName;
+	    	}
+	    	logger.debug("Using the following name as association: {}", remoteClientAssociationName);
+	    } else {
+	    	logger.debug("Could not find PeerTable. The current configuration is: {}", config);
+	    }
+    }
+    	
+    
     serverName = server.getName();
 
     try {
@@ -100,6 +135,8 @@ public class SCTPTransportServer {
 
       remoteClientAssociation = management.addServerAssociation(peerAddress, peerPort, serverName, remoteClientAssociationName,
           IpChannelType.SCTP);
+      
+      logger.debug("The remoteClientAssociation is: {}", remoteClientAssociation);
 
       logger.debug("Setting new Association Listener");
       remoteClientAssociation.setAssociationListener(new ServerAssociationListener());
@@ -120,7 +157,7 @@ public class SCTPTransportServer {
       // logger.debug("Attaching server association to key1");
       // key1.attach(((Association) remoteClientAssociation));
 
-      logger.info(String.format("Connected to {}", remoteClientAssociation));
+      logger.info("Connected to {}", remoteClientAssociation);
     }
     catch (Exception e) {
       // ammendonca: this is managed, no need to do it manually now.
@@ -139,8 +176,25 @@ public class SCTPTransportServer {
     logger.debug("Initializing SCTP server");
     try {
       if (this.management == null) {
-        this.management = new ManagementImpl("server-management-" + origAddress.getAddress().getHostAddress() + "."
-            + origAddress.getPort());
+	    String sctpStackName = "server-management-" + origAddress.getAddress().getHostAddress() + "."
+	            + origAddress.getPort();
+	    if (config != null) {
+	    	sctpStackName = config.getStringValue(Parameters.OwnSctpStackName.ordinal(), null);
+	    	
+	        Configuration[] children = config.getChildren(Parameters.Extensions.ordinal());
+	        
+	        AppConfiguration internalExtensions = (AppConfiguration) children[ExtensionPoint.Internal.id()];
+	        usedManagementImplementation = internalExtensions.getStringValue(
+	                ExtensionPoint.InternalSctpManagementConfiguration.ordinal(), (String) ExtensionPoint.InternalSctpManagementConfiguration.defValue()
+	        );
+	    }
+	    else {
+	    	usedManagementImplementation = ExtensionPoint.InternalSctpManagementConfiguration.defValue();
+	    }  
+    	  
+	    this.management = SctpServerManagementFactory.createOrGetManagement(sctpStackName, usedManagementImplementation);
+    	  
+        //this.management = new ManagementImpl(sctpStackName);
         this.management.setSingleThread(true);
         this.management.start();
         this.management.setConnectDelay(1000);
@@ -148,7 +202,17 @@ public class SCTPTransportServer {
 
       logger.debug("Orig Address: '{}:{}'", origAddress.getAddress().getHostAddress(), origAddress.getPort());
       logger.debug("Dest Address: '{}'", this.destAddress);
-      serverAssociationName = origAddress.getHostName() + ":" + origAddress.getPort();
+      String configuredServerAssociationName = null;
+      if (config != null) {
+    	  configuredServerAssociationName = config.getStringValue(Parameters.ServerAssociationName.ordinal(), null);
+      }
+      
+      if (configuredServerAssociationName != null && !"".equals(configuredServerAssociationName)) {
+    	  serverAssociationName = configuredServerAssociationName;
+      } else {
+    	  serverAssociationName = origAddress.getHostName() + ":" + origAddress.getPort();
+      }
+      //serverAssociationName = origAddress.getHostName() + ":" + origAddress.getPort();
       serverName = serverAssociationName;
 
       // Let's check if we already have the server configured
@@ -211,7 +275,7 @@ public class SCTPTransportServer {
     }
 
     if (getParent() == null) {
-      throw new NotInitializedException("No parent connection is set is set");
+      throw new NotInitializedException("No parent connection is set");
     }
 
     logger.debug("Successfuly initialized SCTP Server Host[{}:{}] Peer[{}:{}]",
